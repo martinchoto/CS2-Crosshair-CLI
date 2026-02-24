@@ -1,0 +1,15 @@
+[project]
+name = "cs2-crosshair-cli"
+version = "0.1.0"
+description = "python cli app for storing crosshairs for cs2 players"
+
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
