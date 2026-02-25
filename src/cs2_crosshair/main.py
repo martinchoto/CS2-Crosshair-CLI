@@ -1,20 +1,20 @@
-import typer
+import typer 
 from pathlib import Path
 from datetime import datetime
-from tinydb import TinyDB, Query
 from rich.console import Console
-from rich.table import Table
+
+from .database import db 
 
 app = typer.Typer()
 console = Console()
 
-APP_DIR = Path(__file__).parent.resolve()
-DB_PATH = APP_DIR / "crosshairs.json"
-db = TinyDB(DB_PATH)
 
 @app.command()
 def add(name: str, code: str):
     
+    if len(db) >= 25:
+        console.print("[red]❌ Vault Full![/red] You can only store 25 crosshairs. Delete one first.")
+        raise typer.Exit()
     
     entry = {
         "name": name, 
@@ -23,7 +23,8 @@ def add(name: str, code: str):
     }
     
     doc_id = db.insert(entry)
-    console.print(f"[green]✔ Saved '[bold]{name}[/bold]' (ID: {doc_id}) to {DB_PATH}[/green]")
+    
+    console.print(f"[green]✔ Saved '[bold]{name}[/bold]' (ID: {doc_id}) [/green]")
     
 @app.command()
 def list():
