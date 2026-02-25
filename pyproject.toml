@@ -2,9 +2,8 @@
 name = "cs2-crosshair-cli"
 version = "0.1.0"
 description = "python cli app for storing crosshairs for cs2 players"
-authors = [{name = "Your Name", email = "you@example.com"}]
 readme = "README.md"
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "typer>=0.12.0",
     "tinydb>=4.8.0",
