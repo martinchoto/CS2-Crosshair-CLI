@@ -3,10 +3,13 @@ import readchar
 from rich.console import Console
 from rich.table import Table
 from rich.live import Live
+from rich.panel import Panel
+from rich.text import Text
 from typing import Optional
 
+
 from .models import Crosshair
-from .utils import validate_crosshair_code, validate_name, name_exists
+from .utils import validate_crosshair_code, validate_name, name_exists, find_by_name, find_by_id
 
 from .database import db 
 
@@ -19,6 +22,13 @@ def add(name: str, code: str):
     
     valid_code = validate_crosshair_code(code)
     
+    #Checks if the name is correct
+    
+    if not validate_name(name):
+        console.print("[bold red]Invalid name[/bold red]")
+        console.print("[yellow]Lenght of the name must be lower than 16 letters and higher than 1[/yellow]")
+        raise typer.Exit()
+    
     # Check if the code is the correct for our crosshair
     
     if not valid_code:
@@ -26,14 +36,6 @@ def add(name: str, code: str):
         console.print("[yellow]Must follow format: [bold]CSGO-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX[/bold][/yellow]")
         raise typer.Exit()
 
-    #Checks if the name is correct
-    
-    if not validate_name(name):
-        console.print("[bold red]Invalid name[/bold red]")
-        console.print("[yellow]Lenght of the name must be lower than 16 letters and higher than 1[/yellow]")
-        raise typer.Exit()
-
-    
     if name_exists(db, name):
         console.print(f"[bold red]Error:[/bold red] A crosshair named '[yellow]{name}[/yellow]' already exists!")
         console.print("[dim]Use a different name or delete the old one first.[/dim]")
@@ -61,7 +63,9 @@ def list(
     )
 ):
     # Get request for all crosshairs
+    
     all_data = db.all()
+    
     if not show_all:
         records = [r for r in all_data if r.get("is_active", True)]
     else:
@@ -117,13 +121,42 @@ def list(
             break
 
 @app.command()
+def find(
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="Search by crosshair name"),
+    id: Optional[int] = typer.Option(None, "--id", help="Search by crosshair ID")
+):
+    # Check for command arguments
+    
+    if name:
+        res = find_by_name(db, name)
+        item = res[0] if res else None
+    elif id:
+        item = find_by_id(db, id)
+    else:
+        console.print("[yellow]Please provide either --name (-n) or --id.[/yellow]")
+        raise typer.Exit()
+
+    # Handle no results
+    if not item:
+        console.print("[bold red]No crosshair found.[/bold red]")
+        return
+
+    # Display results
+    
+    status = "[bold green]ACTIVE[/bold green]" if item.get("is_active", True) else "[bold red]ARCHIVED[/bold red]"
+    
+    print(f"{item["name"]} - {item["code"]}")
+
+
+    
+    
+@app.command()
 def edit():
     
-    print("asdasd")
+    print("Editing...")
 @app.command()
 def delete():
-    print("deleting..")
-
+    print("Deleting..")
 if __name__ == "__main__":
     app()
     
